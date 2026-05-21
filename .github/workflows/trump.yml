@@ -1,0 +1,37 @@
+name: Trump Truth Feed
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-feed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check RSS Feed
+        run: |
+          pip install feedparser requests
+
+          python << EOF
+          import feedparser
+          import requests
+          import os
+
+          webhook = "PASTE_YOUR_DISCORD_WEBHOOK_HERE"
+
+          feed_url = "https://trumpstruth.org/feed"
+
+          feed = feedparser.parse(feed_url)
+
+          latest = feed.entries[0]
+
+          title = latest.title
+          link = latest.link
+
+          msg = f"🚨 New Trump Truth Post\n\n{title}\n\n{link}"
+
+          requests.post(webhook, json={"content": msg})
+
+          EOF
